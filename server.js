@@ -1,15 +1,23 @@
 const express = require('express');
-const XLSX = require('xlsx');
 const cors = require('cors');
+const xlsx = require('xlsx');
 
 const app = express();
-app.use(cors());
+app.use(cors()); // 👈 habilita que tu frontend en Vercel pueda leer la API
 
+// Cargar Excel
+const workbook = xlsx.readFile('tabla.xlsx');
+const sheetName = workbook.SheetNames[0];
+const sheet = workbook.Sheets[sheetName];
+const data = xlsx.utils.sheet_to_json(sheet);
+
+// Ruta principal
 app.get('/datos', (req, res) => {
-  const workbook = XLSX.readFile('tabla.xlsx'); // tu archivo Excel
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const datos = XLSX.utils.sheet_to_json(sheet);
-  res.json(datos);
+  res.json(data);
 });
 
-app.listen(3000, () => console.log('🌟 API híbrida escuchando en http://localhost:3000/datos'));
+// Puerto dinámico para Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌟 API escuchando en el puerto ${PORT}`);
+});
